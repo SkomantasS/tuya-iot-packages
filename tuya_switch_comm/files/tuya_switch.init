@@ -1,0 +1,35 @@
+#!/bin/sh /etc/rc.common
+
+USE_PROCD=1
+
+start_service() {
+        local device_id
+		local product_id
+		local device_secret
+		local run_as_daemond
+
+        config_load 'tuya_switch'
+        config_get device_id connection_set 'device_id'
+		config_get product_id connection_set 'product_id'
+		config_get device_secret connection_set 'device_secret'
+		config_get run_as_daemond connection_set 'run_as_daemond'
+
+		procd_open_instance
+	if [ "$run_as_daemond" -eq 1 ]; then
+			procd_set_param command /usr/bin/tuya_switch_comm -d $device_id -p $product_id -s $device_secret -b
+	else
+			procd_set_param command /usr/bin/tuya_switch_comm -d $device_id -p $product_id -s $device_secret
+	fi
+		procd_set_param pidfile /var/run/tuya_switch.pid
+		procd_set_param file /etc/config/tuya_switch
+		procd_close_instance
+}
+
+service_triggers() {
+	procd_add_reload_trigger "tuya_switch"
+}
+
+reload_service() {
+	stop
+	start
+}

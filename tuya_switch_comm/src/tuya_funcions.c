@@ -47,22 +47,23 @@ static void on_messages(tuya_mqtt_context_t* context, void* user_data, const tuy
 
 int tuya_mqtt_init_function(tuya_mqtt_context_t *client,struct arguments *arguments)
 {
-int ret = tuya_mqtt_init(client, &(const tuya_mqtt_config_t) {
-    .host = "m1.tuyacn.com",
-    .port = 8883,
-    .cacert = tuya_cacert_pem,
-    .cacert_len = sizeof(tuya_cacert_pem),
-    .device_id = arguments->deviceId,
-    .device_secret = arguments->deviceSecret,
-    .keepalive = 100,   
-    .timeout_ms = 2000,
-    .on_messages = on_messages
-});
-return ret;
+    int ret = tuya_mqtt_init(client, &(const tuya_mqtt_config_t) {
+        .host = "m1.tuyacn.com",
+        .port = 8883,
+        .cacert = tuya_cacert_pem,
+        .cacert_len = sizeof(tuya_cacert_pem),
+        .device_id = arguments->deviceId,
+        .device_secret = arguments->deviceSecret,
+        .keepalive = 100,   
+        .timeout_ms = 2000,
+        .on_messages = on_messages
+    });
+    return ret;
 }
 
-void send_f_m_p_to_tuya(tuya_mqtt_context_t *client)
+int send_f_m_p_to_tuya(tuya_mqtt_context_t *client)
 {   
+    int ret = 0;
     struct ubus_context *ctx;
 	uint32_t id;
 	struct MemData memory = { 0 };
@@ -74,7 +75,7 @@ void send_f_m_p_to_tuya(tuya_mqtt_context_t *client)
     if (ubus_lookup_id(ctx, "system", &id) ||
         ubus_invoke(ctx, id, "info", NULL, board_cb, &memory, 3000)) {
         fprintf(stderr, "cannot request memory info from procd\n");
-        // rc = -1;
+        ret = -1;
     } else {
         char free_memory_percent[120];
         double freePercentage = ((double)memory.free/memory.total)*100.0;
@@ -83,4 +84,5 @@ void send_f_m_p_to_tuya(tuya_mqtt_context_t *client)
         syslog(LOG_USER | LOG_INFO, "sending: %s",free_memory_percent);
     }
     ubus_free(ctx);
+    return ret;
 }

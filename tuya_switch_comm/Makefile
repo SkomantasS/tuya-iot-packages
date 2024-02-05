@@ -11,15 +11,6 @@ define Package/tuya_switch_comm
 	TITLE:=tuya_switch_comm
 	DEPENDS:=+tuya-SDK-libs +libubus +libubox
 endef
-#  +libblobmsg-json
-#	DEPENDS:=+liblink_core +libmiddleware_implementation +libplatform_port +libutils_modules +libargp
-
-#	DEPENDS:=+liblink_core
-#	DEPENDS:=+libmiddleware_implementation
-#	DEPENDS:=+libplatform_port
-#	DEPENDS:=+libutils_modules
-#	DEPENDS:=+libargp
-#	DEPENDS:=+USE_UCLIBC:argp-standalone
 	
 define Package/tuya_switch_comm/description
 	This is a package that communicates with tuya cloud
@@ -27,8 +18,11 @@ endef
 
 define Package/tuya_switch_comm/install
 	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_DIR) $(1)/etc/config
+	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/tuya_switch_comm $(1)/usr/bin
-
+	$(INSTALL_BIN) ./files/tuya_switch.init $(1)/etc/init.d/tuya_switch
+	$(INSTALL_CONF) ./files/tuya_switch.config $(1)/etc/config/tuya_switch
 endef
 
 $(eval $(call BuildPackage,tuya_switch_comm))

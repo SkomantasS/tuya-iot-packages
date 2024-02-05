@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 {   
     int ret = OPRT_OK;
     char doc[] = "Program to communicate with tuya cloud";
-    char args_doc[] = "Device-ID Pruduct-ID Device-secret";
+    char args_doc[] = "<Device-ID> <Pruduct-ID> <Device-secret>";
     struct argp_option options[] = {
         {"device-ID", 'd', "Dev-ID", 0, "Enter Device ID", 0},
         {"product-ID", 'p', "Prod-ID", 0, "Enter Product ID ", 0},
@@ -44,8 +44,7 @@ int main(int argc, char** argv)
     struct arguments arguments;
     arguments.start_as_daemon = 0;
     ret = argp_parse (&argp, argc, argv, 0, 0, &arguments);
-    if (argc < 7){
-        ret = -1;
+    if(ret) {
         return ret;
     }
     // argp end
@@ -85,7 +84,10 @@ int main(int argc, char** argv)
 
     for (;;) {
         /* Loop to receive packets, and handles client keepalive */
-        send_f_m_p_to_tuya(client);
+        ret = send_f_m_p_to_tuya(client);
+        if(ret) {
+            syslog(LOG_USER | LOG_ERR, "error sending property");
+        }
         tuya_mqtt_loop(client);
     }
     tuya_mqtt_disconnect(client);
