@@ -21,11 +21,6 @@ start_service() {
 	procd_close_instance
 }
 
-stop_service()
-{
-    kill $(cat $PIDFILE)
-}
-
 service_triggers() {
 	procd_add_reload_trigger "tuya_switch"
 }
